@@ -126,13 +126,13 @@ function App() {
       };
 
       setIsMonitoring(true);
-      setStatusMessage("👁️ Monitoreando pantalla...");
+      setStatusMessage("Escaneando pantalla...");
       
       intervalRef.current = window.setInterval(captureAndAnalyze, 5000);
 
     } catch (err) {
       console.error("Error starting screen share:", err);
-      setStatusMessage("Error: No se pudo iniciar la captura. Asegúrate de dar permisos.");
+      setStatusMessage("Error: Permisos denegados.");
     }
   };
 
@@ -163,7 +163,7 @@ function App() {
     
     // Check if video is actually playing (not paused by backgrounding)
     if (video.paused || video.ended) {
-      setStatusMessage("⚠️ Video pausado por el sistema. Intenta usar Pantalla Dividida.");
+      setStatusMessage("⚠️ Pausado por sistema. Usa Pantalla Dividida.");
       return;
     }
     
@@ -175,8 +175,6 @@ function App() {
     ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
     
     const base64String = canvas.toDataURL('image/jpeg', 0.6).split(',')[1];
-
-    setStatusMessage("🔄 Analizando fotograma...");
     
     try {
       const result = await analyzeScreenshot(base64String);
@@ -191,16 +189,16 @@ function App() {
             sendNotification(result, calculated);
           }
           setLastProcessedOffer(offerId);
-          setStatusMessage(`✅ Oferta detectada: ${result.currency}${result.totalPrice}`);
+          setStatusMessage(`✅ Oferta: ${result.currency}${result.totalPrice}`);
         } else {
-           setStatusMessage("💤 Misma oferta, esperando nueva...");
+           setStatusMessage("👀 Esperando nueva oferta...");
         }
       } else {
-        setStatusMessage("👀 Buscando oferta de viaje...");
+        // Just searching silently or minimal update
       }
     } catch (e) {
       console.error(e);
-      setStatusMessage("⚠️ Error en análisis, reintentando...");
+      // Fail silently to keep UI clean
     }
   };
 
@@ -215,14 +213,10 @@ function App() {
       <header className="bg-slate-900 border-b border-slate-800 p-4 sticky top-0 z-50 shadow-md">
         <div className="max-w-md mx-auto flex justify-between items-center">
           <div className="flex items-center gap-2">
-            <div className={`p-1.5 rounded-lg ${isMonitoring ? 'bg-red-500 animate-pulse' : 'bg-blue-600'}`}>
-              {isMonitoring ? (
-                <div className="w-5 h-5 flex items-center justify-center font-bold text-xs">REC</div>
-              ) : (
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5 text-white">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M15.59 14.37a6 6 0 0 1-5.84 7.38v-4.8m5.84-2.58a14.98 14.98 0 0 0 6.16-12.12A14.98 14.98 0 0 0 9.631 8.41m5.96 5.96a14.926 14.926 0 0 1-5.841 2.58m-.119-8.54a6 6 0 0 0-7.381 5.84h4.8m2.581-5.84a14.927 14.927 0 0 0-2.58 5.84m2.699 2.7c-.103.021-.207.041-.311.06a15.09 15.09 0 0 1-2.448-2.448 14.9 14.9 0 0 1 .06-.312m-2.24 2.39a4.493 4.493 0 0 0-1.757 4.306 4.493 4.493 0 0 0 4.306-1.758M16.5 9a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0Z" />
-                </svg>
-              )}
+            <div className={`p-1.5 rounded-lg transition-colors duration-300 ${isMonitoring ? 'bg-emerald-600 shadow-[0_0_10px_rgba(5,150,105,0.5)]' : 'bg-blue-600'}`}>
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5 text-white">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15.59 14.37a6 6 0 0 1-5.84 7.38v-4.8m5.84-2.58a14.98 14.98 0 0 0 6.16-12.12A14.98 14.98 0 0 0 9.631 8.41m5.96 5.96a14.926 14.926 0 0 1-5.841 2.58m-.119-8.54a6 6 0 0 0-7.381 5.84h4.8m2.581-5.84a14.927 14.927 0 0 0-2.58 5.84m2.699 2.7c-.103.021-.207.041-.311.06a15.09 15.09 0 0 1-2.448-2.448 14.9 14.9 0 0 1 .06-.312m-2.24 2.39a4.493 4.493 0 0 0-1.757 4.306 4.493 4.493 0 0 0 4.306-1.758M16.5 9a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0Z" />
+              </svg>
             </div>
             <h1 className="text-xl font-bold tracking-tight">DriverCopilot</h1>
           </div>
@@ -248,7 +242,7 @@ function App() {
         
         {/* Install Button (Visible only if installable) */}
         {installPrompt && (
-          <div className="bg-gradient-to-r from-blue-900 to-slate-900 p-4 rounded-xl border border-blue-700 flex justify-between items-center shadow-lg">
+          <div className="bg-gradient-to-r from-blue-900 to-slate-900 p-4 rounded-xl border border-blue-700 flex justify-between items-center shadow-lg animate-fadeIn">
             <div>
               <h3 className="font-bold text-blue-100">Instalar App</h3>
               <p className="text-xs text-blue-300">Descarga para acceso rápido</p>
@@ -263,15 +257,17 @@ function App() {
         )}
 
         {/* Live Monitor Controls */}
-        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 text-center shadow-xl relative overflow-hidden">
+        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 text-center shadow-xl relative overflow-hidden group">
            
-           {/* Background Pulse Effect */}
+           {/* Active Scanning Visual Effect */}
            {isMonitoring && (
-             <div className="absolute inset-0 bg-emerald-500/5 animate-pulse pointer-events-none"></div>
+             <div className="absolute inset-0 pointer-events-none rounded-2xl overflow-hidden">
+                <div className="w-full h-1/2 bg-gradient-to-b from-emerald-500/0 to-emerald-500/10 animate-scan border-b border-emerald-500/30"></div>
+             </div>
            )}
 
            <div className="mb-4 relative z-10">
-             <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${isMonitoring ? 'bg-emerald-900/50 text-emerald-400 border border-emerald-800' : 'bg-slate-800 text-slate-400'}`}>
+             <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium transition-all duration-300 ${isMonitoring ? 'bg-emerald-900/50 text-emerald-400 border border-emerald-800 shadow-[0_0_15px_rgba(16,185,129,0.2)]' : 'bg-slate-800 text-slate-400'}`}>
                {statusMessage}
              </span>
            </div>
@@ -279,7 +275,7 @@ function App() {
            {!isMonitoring ? (
              <button 
                onClick={startMonitoring}
-               className="w-full py-4 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl shadow-[0_0_20px_rgba(37,99,235,0.3)] transition-all flex items-center justify-center gap-3 transform active:scale-95"
+               className="w-full py-4 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl shadow-[0_0_20px_rgba(37,99,235,0.3)] transition-all flex items-center justify-center gap-3 transform active:scale-[0.98]"
              >
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.347a1.125 1.125 0 0 1 0 1.972l-11.54 6.347a1.125 1.125 0 0 1-1.667-.986V5.653Z" />
@@ -289,7 +285,7 @@ function App() {
            ) : (
              <button 
                onClick={stopMonitoring}
-               className="w-full py-4 bg-red-600 hover:bg-red-500 text-white font-bold rounded-xl shadow-[0_0_20px_rgba(220,38,38,0.3)] transition-all flex items-center justify-center gap-3 transform active:scale-95 relative z-10"
+               className="w-full py-4 bg-red-600 hover:bg-red-500 text-white font-bold rounded-xl shadow-[0_0_20px_rgba(220,38,38,0.3)] transition-all flex items-center justify-center gap-3 transform active:scale-[0.98] relative z-10"
              >
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 5.25v13.5m-7.5-13.5v13.5" />
@@ -304,7 +300,7 @@ function App() {
                  <path fillRule="evenodd" d="M18 10a8 8 0 1 1-16 0 8 8 0 0 1 16 0Zm-8-5a.75.75 0 0 1 .75.75v4.5a.75.75 0 0 1-1.5 0v-4.5A.75.75 0 0 1 10 5Zm0 10a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z" clipRule="evenodd" />
                </svg>
                <span>
-                 <strong>Nota:</strong> Algunos celulares pausan la lectura si minimizas esta app. Si no recibes alertas, usa la <strong>Pantalla Dividida</strong> de Android.
+                 Si minimizas la app, usa <strong>Pantalla Dividida</strong> para que siga analizando en tiempo real.
                </span>
              </p>
            </div>
@@ -313,7 +309,10 @@ function App() {
         {/* Results */}
         {currentResult && metrics && currentResult.valid && (
           <div className="animate-slideUp">
-            <h3 className="text-slate-400 text-sm uppercase font-bold tracking-wider mb-3 ml-1">Último Análisis</h3>
+            <h3 className="text-slate-400 text-sm uppercase font-bold tracking-wider mb-3 ml-1 flex justify-between items-end">
+              <span>Último Análisis</span>
+              <span className="text-[10px] text-slate-500 font-mono">ID: {Math.floor(Date.now() / 1000).toString().slice(-4)}</span>
+            </h3>
             <ResultDisplay result={currentResult} metrics={metrics} settings={settings} />
           </div>
         )}
