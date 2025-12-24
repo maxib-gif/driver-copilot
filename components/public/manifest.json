@@ -1,0 +1,23 @@
+{
+  "name": "DriverCopilot",
+  "short_name": "DriverCopilot",
+  "start_url": ".",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0f172a",
+  "theme_color": "#0f172a",
+  "description": "Analizador de rentabilidad para conductores de Uber y Didi mediante IA.",
+  "categories": ["productivity", "finance", "utilities"],
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/3097/3097180.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/3097/3097180.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
